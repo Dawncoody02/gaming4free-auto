@@ -1,5 +1,4 @@
 import os, sys, time, urllib.request, json
-import subprocess
 from seleniumbase import SB
 
 # ==========================================
@@ -25,20 +24,16 @@ print(f"\n===== 🚀 开始执行极速续期 (终极物理盲狙版) =====")
 
 proxy_str = "socks5://127.0.0.1:40000"
 
-with SB(uc=True, proxy=proxy_str, headless=False) as sb:
+# 🌟 核心修复：直接在启动时强行锁死 1920x1080 分辨率，绝对不调用会导致崩溃的 maximize_window！
+with SB(uc=True, proxy=proxy_str, headless=False, window_size="1920,1080") as sb:
     try:
         print("⏳ 正在为虚拟显示器安装 xdotool 物理鼠标引擎...")
-        # 预装 X11 系统级鼠标工具，过程静默
         os.system("sudo apt-get update > /dev/null 2>&1")
-        os.system("sudo apt-get install -y xdotool x11-utils > /dev/null 2>&1")
+        os.system("sudo apt-get install -y xdotool > /dev/null 2>&1")
 
         print(f"🌐 正在通过 WARP 访问新版目标网址: {TARGET_URL}")
         sb.open(TARGET_URL)
         sb.sleep(6) 
-        
-        # 🌟 必须最大化窗口，确保网页视图的中心完美对齐虚拟屏幕的中心！
-        sb.driver.maximize_window()
-        sb.sleep(1)
         
         os.makedirs("screenshots", exist_ok=True)
         sb.save_screenshot("screenshots/1_page_loaded.png")
@@ -74,23 +69,16 @@ with SB(uc=True, proxy=proxy_str, headless=False) as sb:
         time.sleep(6) 
         
         print("🛡️ 启动【全盲物理狙击】模块，准备跨维度开火！")
-        try:
-            # 使用 xdpyinfo 获取 Github Actions 虚拟屏幕的真实分辨率
-            out = subprocess.check_output("xdpyinfo | grep dimensions", shell=True).decode()
-            dim_str = out.strip().split()[1]
-            w, h = map(int, dim_str.split('x'))
-        except Exception as e:
-            print(f"⚠️ 分辨率雷达探测失败，回退至安全坐标... ({e})")
-            w, h = 1024, 768
-
-        # 🌟 核心物理运算：弹窗绝对居中，复选框在弹窗偏左。向下偏移 30px 绕开浏览器顶部地址栏 UI。
-        target_x = (w // 2) - 80
-        target_y = (h // 2) + 30 
+        
+        # 🌟 既然分辨率锁死了 1920x1080，直接计算物理坐标，免去复杂的探测！
+        w, h = 1920, 1080
+        target_x = (w // 2) - 80   # 弹窗居中，复选框偏左
+        target_y = (h // 2) + 30   # 抵消浏览器顶部导航栏的偏移
         
         print(f"🎯 锁定屏幕绝对坐标: ({target_x}, {target_y})")
         print("🖱️ 物理鼠标按下扳机！")
         
-        # 调用原生 Linux xdotool 发送真正的硬件级鼠标移动与点击事件！(CF 根本无法察觉)
+        # 调用原生 Linux xdotool 发送真正的硬件级鼠标点击
         os.system(f"xdotool mousemove {target_x} {target_y} click 1")
         
         print("⏳ 射击完毕！静默等待 8 秒，让子弹飞一会儿 (等待盾转圈通过)...")
@@ -103,7 +91,7 @@ with SB(uc=True, proxy=proxy_str, headless=False) as sb:
             print("⚠️ 截图保存失败。")
 
         print("✅ 流程执行完毕！")
-        send_tg(f"✅ 服务器 [{MC_USERNAME}] 续期脚本运行完毕！\n【破盾方式: 物理盲狙】请查阅 GitHub 最新截图确认 CF 盾是否通过以及时间是否增加。")
+        send_tg(f"✅ 服务器 [{MC_USERNAME}] 续期脚本运行完毕！\n【破盾方式: 物理盲狙】请查阅 GitHub 最新截图确认 CF 盾是否通过。")
 
     except Exception as e:
         print(f"❌ 发生致命错误: {e}")
